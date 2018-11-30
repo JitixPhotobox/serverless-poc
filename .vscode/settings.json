@@ -1,3 +1,9 @@
 {
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "npm.packageManager": "yarn",
+    "eslint.packageManager": "yarn",
+    "editor.formatOnSave": true,
+    "prettier.eslintIntegration": true,
+    "javascript.format.enable": false,
+    "eslint.autoFixOnSave": true,
 }

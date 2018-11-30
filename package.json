@@ -10,11 +10,20 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
+    "babel-eslint": "^10.0.1",
     "babel-loader": "7",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-2": "^6.24.1",
     "copy-webpack-plugin": "^4.6.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-prettier": "^3.3.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jest": "^22.1.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
+    "eslint-plugin-react": "^7.11.1",
+    "eslint-plugin-wyze": "^3.4.0",
+    "prettier-eslint": "^8.8.2",
     "rimraf": "^2.6.2",
     "serverless": "^1.33.1",
     "serverless-aws-documentation": "^1.1.0",
@@ -27,7 +36,8 @@
     "dev": "yarn cleanup && cross-env NODE_ENV=development webpack --config webpack.config.js --watch --mode development",
     "cleanup": "rimraf lib/",
     "deploy:dev": "yarn build && cd lib && sls deploy -v --stage development",
-    "build": "yarn cleanup && cross-env NODE_ENV=production webpack --config webpack.config.js --mode production"
+    "build": "yarn cleanup && cross-env NODE_ENV=production webpack --config webpack.config.js --mode production",
+    "lint": "eslint src/toolkit.js"
   },
   "author": "",
   "license": "ISC"
