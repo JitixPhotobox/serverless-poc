@@ -1,0 +1,155 @@
+service: jeremie-toolkit-service
+
+custom:
+  environment: ${opt:stage, 'development'}
+  certEnvironment:
+    development: "test"
+    staging: "test"
+    production: "production"
+  region: ${opt:region, 'eu-west-1'}
+  includeDependencies:
+    always:
+      - 'local/**'
+  documentation:
+    info:
+      ...cut...
+    models:
+      -
+        name: "ToolkitPut"
+        description: "Toolkit Data Object"
+        contentType: "application/json"
+        schema: ${file(models/toolkit-put.json)}
+      -
+        name: "ToolkitPost"
+        description: "Toolkit Data Object"
+        contentType: "application/json"
+        schema: ${file(models/toolkit-post.json)}
+provider:
+  name: aws
+  runtime: nodejs8.10
+  region: eu-west-1
+  endpointType: REGIONAL
+  stage: ${opt:stage, 'development'}
+  timeout: 15
+  memorySize: 512
+  environment:
+    STACK: ${self:custom.environment}
+    DEFAULT_REGION: ${self:custom.region}
+    PLANBOARD_URI: "https://ecom-planboard-api-${self:custom.environment}.sls-${self:custom.certEnvironment.${self:custom.environment}}.photobox.com/"
+    DESIGN_URI: "https://ecom-design-api-${self:custom.environment}.sls-${self:custom.certEnvironment.${self:custom.environment}}.photobox.com/design"
+    VARIANT_URI: "http://ecom-variant-api-${self:custom.environment}.k8s-${self:custom.certEnvironment.${self:custom.environment}}.photobox.com/variants"
+    DYNAMODB_TABLE: "toolkitt"
+    BUCKET_NAME: jeremie-test
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      # Restrict our IAM role permissions to
+      # the specific table for the stage
+      Resource:
+        - "Fn::GetAtt": [ ToolkitTable, Arn ]
+
+package:
+  individually: true
+  excludeDevDependencies: false
+  exclude:
+    - .git/**
+
+resources:
+  Resources:
+    ToolkitTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Delete
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: uuid
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+    onlyBody:
+      Type: "AWS::ApiGateway::RequestValidator"
+      Properties:
+        Name: 'only-body'
+        RestApiId: 
+          Ref: ApiGatewayRestApi
+        ValidateRequestBody: true
+        ValidateRequestParameters: false
+    GatewayResponseBadRequestBody:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        RestApiId: 
+          Ref: "ApiGatewayRestApi"
+        ResponseType: BAD_REQUEST_BODY
+        ResponseTemplates:
+          "application/json": '{"message":"$context.error.validationErrorString", "requestId":"$context.requestId", "jeremie":"<3"}'
+functions:
+  getItem:
+    handler: toolkit.getItemHandler
+    events:
+      - http:
+          path: toolkit/{uuid}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                uuid: true
+  putItem:
+    handler: toolkit.putItemHandler
+    events:
+      - http:
+          path: toolkit
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            passThrough: NEVER
+          reqValidatorName: onlyBody
+          documentation:
+            summary: "Create a new toolkit"
+            description: "Create a new toolit"
+            requestModels:
+              "application/json": "ToolkitPost"
+      - http:
+          path: toolkit/{uuid}
+          method: put
+          cors: true
+          integration: lambda
+          request:
+            passThrough: NEVER
+            parameters:
+              paths:
+                uuid: true
+          reqValidatorName: onlyBody
+          documentation:
+            summary: "Create a new toolkit"
+            description: "Create a new toolit"
+            requestModels:
+              "application/json": "ToolkitPut"
+  deleteItem:
+    handler: toolkit.putItemHandler
+    events:
+      - http:
+          path: toolkit/{uuid}
+          method: delete
+          cors: true
+    timeout: 10
+    tags:
+      endpoint: "toolkit"
+    package:
+      include:
+        - toolkit.js
+plugins:
+  - serverless-aws-documentation
+  - serverless-reqvalidator-plugin

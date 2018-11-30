@@ -1,0 +1,69 @@
+{
+  "parser": "babel-eslint",
+  "extends": [
+    "airbnb",
+    "prettier"
+  ],
+  "settings": {
+    "import/resolver": {
+    "webpack": {
+      "config": "./webpack.config.js"
+      }
+    }
+  },
+  "rules": {
+    "comma-dangle": 0,
+    "import/order": [
+      "error", {
+        "groups": [
+        "builtin",
+        "external",
+        "internal",
+        "parent",
+        "sibling",
+        "index"
+      ]
+      }
+    ],
+    "jest/no-disabled-tests": "warn",
+    "jest/no-focused-tests": "error",
+    "jest/no-identical-title": "error",
+    "wyze/sort-destructuring-keys": 0,
+    "jsx-a11y/no-noninteractive-element-to-interactive-role": "warn",
+    "arrow-parens": 0,
+    "max-len": [
+      "error",
+      120
+    ],
+    "arrow-body-style": 0,
+    "no-console": 0,
+    "padded-blocks": 0,
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": true,
+        "optionalDependencies": false,
+        "peerDependencies": false
+      }
+    ],
+    "newline-per-chained-call": 0,
+    "import/prefer-default-export": 0,
+    "no-mixed-operators": 0,
+    "jsx-a11y/href-no-hash": "off",
+    "no-use-before-define": 1,
+    "import/no-named-as-default": 0
+  },
+  "globals": {
+    "document": true,
+    "window": true
+  },
+  "env": {
+    "node": true,
+    "jest": true
+  },
+  "plugins": [
+    "jest",
+    "wyze",
+    "import"
+  ]
+}
