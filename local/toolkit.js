@@ -13,7 +13,7 @@ const event = {
 
 const context = {};
 
-ppd.handler(event, context, (err,data) => {
+ppd.handler(event, context, (err, data) => {
   console.log(data.body);
   console.log(data);
 });
